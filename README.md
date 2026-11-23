@@ -41,131 +41,106 @@ The dataset used for this experiment is `fish.csv` which contains real-world phy
 ## Program & Output
 ## Input 1
 ```
-
-# Multiple Regression Using CSV File (Fish Dataset)
-
-# Step 1: Import Required Libraries
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+import seaborn as sns
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import r2_score
+from sklearn.model_selection import train_test_split
 
-# Step 2: Load Dataset
-df = pd.read_csv('/content/Fish_length.csv')
+# Step 2: Calculate Mean Length
+df['L'] = (df['Length1'] + df['Length2'] + df['Length3']) / 3
 
-# Step 3: Display Dataset
-print(df.head())
-print(df.columns)
+# Step 3: Select Independent and Dependent Variables
+X = df[['L', 'Height', 'Width']]
+Y = df['Weight']
+
+# Step 4: Split Dataset
+X_train, X_test, Y_train, Y_test = train_test_split(
+    X, Y, test_size=0.2, random_state=42
+)
+
+# Step 5: Train Multiple Linear Regression Model
+model = LinearRegression()
+model.fit(X_train, Y_train)
+
+# Step 6: Display Coefficients and Intercept
+print("\nIntercept:", model.intercept_)
+print("Coefficients:", model.coef_)
+
+# Regression Equation
+print("\nRegression Equation:")
+print(f"Weight = {model.intercept_:.2f} "
+      f"+ ({model.coef_[0]:.2f} * L) "
+      f"+ ({model.coef_[1]:.2f} * Height) "
+      f"+ ({model.coef_[2]:.2f} * Width)")
 ```
 ## Output 1
 ```
-  Species  Weight  Length1  Length2  Length3   Height   Width
-0   Roach   259.1     25.1     27.2     29.9   8.8210  4.6136
-1   Bream   423.2     29.0     30.9     33.5  13.4218  5.6620
-2   Roach   151.1     21.4     23.2     25.2   7.2479  3.9580
-3   Perch   523.2     31.5     34.2     37.6   9.9794  5.5136
-4   Perch   355.7     27.3     29.9     32.9   8.7762  4.7713
-Index(['Species', 'Weight', 'Length1', 'Length2', 'Length3', 'Height',
-       'Width'],
-      dtype='object')
+Intercept: -411.71191786599957
+Coefficients: [ 27.17519101  21.10608547 -46.84772752]
+
+Regression Equation:
+Weight = -411.71 + (27.18 * L) + (21.11 * Height) + (-46.85 * Width)
 ```
 ## Input 2
 ```
-# Step 4: Select Independent (X) and Dependent (Y) Variables
+# Step 7: Predict Weight
+Y_pred = model.predict(X_test)
 
-# Calculate average length
-L = df[['Length1', 'Length2', 'Length3']].mean(axis=1)
-
-# Independent variables
-X = pd.DataFrame({
-    'L': L,
-    'Height': df['Height'],
-    'Width': df['Width']
-})
-
-# Dependent variable
-Y = df['Weight']
-
-# Step 5: Build and Train the Multiple Regression Model
-model = LinearRegression()
-model.fit(X, Y)
-
-# Step 6: Display Model Coefficients and Intercept
-print("Intercept:", model.intercept_)
-print("Coefficients:", model.coef_)
+print("\nActual vs Predicted:")
+print(pd.DataFrame({
+    'Actual Weight': Y_test.values,
+    'Predicted Weight': Y_pred
+}))
 ```
 ## Output 2
 ```
-Intercept: -495.38038500886614
-Coefficients: [  38.44144067   25.80398645 -107.6604105 ]
+Actual vs Predicted:
+    Actual Weight  Predicted Weight
+0           622.3        572.715893
+1            72.9         67.110028
+2           117.7        186.207677
+3          1893.2       1255.578210
+4           358.8        393.115813
+5           446.4        475.422323
+6          1034.7        902.209621
+7           226.0        269.341671
+8            19.1        -54.659483
+9           141.5        215.815797
+10           76.1         87.145765
 
 ```
 ## Input 3
 ```
-# Regression Equation
-print("\nRegression Equation:")
-print("Weight =", model.intercept_,
-      "+", model.coef_[0], "* L",
-      "+", model.coef_[1], "* Height",
-      "+", model.coef_[2], "* Width")
+# Step 8: Evaluate Model
+r2 = r2_score(Y_test, Y_pred)
+print("\nR2 Score:", r2)
 ```
 ## Output 3
 ```
-Regression Equation:
-Weight = -495.38038500886614 + 38.441440670641356 * L + 25.803986449763947 * Height + -107.66041049560657 * Width
+R2 Score: 0.8599170110482375
 
 ```
 ## Input 4
 ```
-# Step 7: Predict Target Variable Values
-Y_pred = model.predict(X)
-
-print("\nPredicted Values:")
-print(Y_pred)
-```
-## Output 4
-```
-Predicted Values:
-[ 288.82998398  438.19250231  159.92860991  492.19841849  371.92504575
-   25.27356172 -111.1782049   233.01936222  -81.7527203   538.78563123
-  325.99588442  575.02180527  215.28602323 1503.04128115  301.47481017
-  225.57602786  397.34540489  754.01370124   88.14922326  391.26866704
-   56.22741025  186.5913662   289.48635608  586.76542651  555.09324726
-  329.23846602  266.18099288  154.36299483  682.56098996  372.33259089
-  393.53694876  590.54158244  171.69644744  841.32245857  231.66327135
-  -64.93498541  532.00327008  337.76229326  410.33233346   83.55578122
-  693.12627611 1058.64463492  289.69287515  -64.54923009  271.70509414
-  361.99025962  501.5869448   582.76931523  358.77826301  482.41447159
- -142.06041779  446.3109905    64.94927522  434.0283514  1107.99863523]
-```
-## Input 5
-```
-# Step 8: Evaluate Model Accuracy
-accuracy = r2_score(Y, Y_pred)
-print("\nR2 Score:", accuracy)
-```
-## Output 5
-```
-R2 Score: 0.9139876519274813
-```
-## Input 6
-```
 # Step 9: Visualize Actual vs Predicted Values
-plt.plot(Y.values, label='Actual Weight')
-plt.plot(Y_pred, label='Predicted Weight')
+plt.figure(figsize=(8, 5))
 
-plt.title('Actual vs Predicted Fish Weight')
-plt.xlabel('Fish Index')
-plt.ylabel('Weight')
+plt.plot(Y_test.values, label='Actual Weight', marker='o')
+plt.plot(Y_pred, label='Predicted Weight', marker='x')
+
+plt.title('Multiple Regression - Fish Weight Prediction')
+plt.xlabel('Test Samples')
+plt.ylabel('Weight (grams)')
 plt.legend()
 plt.show()
 ```
-## Output 6
+## Output 4
 
-<img width="580" height="455" alt="image" src="https://github.com/user-attachments/assets/6b684812-1198-4c72-8ab5-5176621bc757" />
-
+<img width="704" height="470" alt="image" src="https://github.com/user-attachments/assets/731cf95f-ef58-4309-8605-809e4ad9f2d5" />
 
 ## Result
 
-Thus, Multiple Linear Regression was performed on a dataset imported from a CSV file using Python. The relationship between multiple independent variables and the dependent variable was analysed, and the objective was successfully achieved.
+Thus, Multiple Linear Regression was successfully implemented on the Fish dataset using Python. The model predicted fish weight based on length, height, and width. Its performance was evaluated using the R² score, and actual and predicted values were visualized using Matplotlib.
