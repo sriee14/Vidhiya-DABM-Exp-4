@@ -1,4 +1,4 @@
-# Experiment 4: Multiple Regression Analysis (Fish Dataset)
+# Experiment No 4: Multiple Regression Analysis (Fish Dataset)
 
 ## Aim
 To perform Multiple Linear Regression on a dataset imported from a CSV file to analyze how multiple features together predict a dependent variable.
